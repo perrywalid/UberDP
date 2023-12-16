@@ -32,4 +32,9 @@ public class UserService {
     public void updateUser(User user, String type) {
         Database.getInstance().updatePersonalInfo(user, type);
     }
+
+    public void sendComplaint(Customer customer, String description) {
+        Complaint complaint = new Complaint(customer, description);
+        Database.getInstance().addComplaint(complaint);
+    }
 }

@@ -17,6 +17,8 @@ public class TripBuilder implements TripBuilderInterface {
     private boolean isCompleted;
     private double fare;
     private FareCalculatorStrategy fareCalculatorStrategy;
+    private float rating;
+    private int id;
 
     @Override
     public TripBuilderInterface setPickupLocation(String pickupLocation){
@@ -69,7 +71,17 @@ public class TripBuilder implements TripBuilderInterface {
         return this;
     }
     @Override
+    public TripBuilderInterface setID(int id){
+        this.id = id;
+        return this;
+    }
+    @Override
+    public TripBuilderInterface setRating(float rating){
+        this.rating = rating;
+        return this;
+    }
+    @Override
     public Trip build(){
-        return new Trip(customer, driver, pickupLocation, dropoffLocation, pickupTime, distance, duration, isCompleted, fare, fareCalculatorStrategy);
+        return new Trip(id, customer, driver, pickupLocation, dropoffLocation, pickupTime, distance, duration, isCompleted, fare, fareCalculatorStrategy, rating);
     }
 }

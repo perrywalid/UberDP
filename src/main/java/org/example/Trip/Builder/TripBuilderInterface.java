@@ -19,5 +19,9 @@ public interface TripBuilderInterface {
 
     TripBuilderInterface setFare(double fare);
 
+    TripBuilderInterface setID(int id);
+
+    TripBuilderInterface setRating(float rating);
+
     public Trip build();
 }

@@ -12,4 +12,8 @@ public class Customer extends User {
     public Customer(String name, String email, String password, String phone) {
         super(name, email, password, phone);
     }
+    public List<Trip> getTrips() {
+        this.trips = Database.getInstance().getTripsByCustomer(this);
+        return trips;
+    }
 }

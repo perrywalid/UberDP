@@ -151,7 +151,12 @@ public class Database {
             preparedStatement.execute();
             ResultSet resultSet = preparedStatement.getResultSet();
             if (resultSet.next()) {
-                return (Driver) UserFactory.createUser("driver", resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("email"), null, resultSet.getString("phone"));
+                Driver driver = (Driver) UserFactory.createUser("driver", resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("email"), null, resultSet.getString("phone"));
+                assert driver != null;
+                driver.setAverageRating(resultSet.getDouble("averageRating"));
+                driver.setNumberOfTrips(resultSet.getInt("numberOfTrips"));
+                driver.setTotalRating(resultSet.getDouble("totalRating"));
+                return driver;
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -170,8 +175,9 @@ public class Database {
     }
     public void completeTrip(Trip trip) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE trip SET isCompleted = 1 WHERE id = ?");
-            preparedStatement.setInt(1, trip.getId());
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE trip SET isCompleted = 1, rating = ? WHERE id = ?");
+            preparedStatement.setFloat(1, trip.getRating());
+            preparedStatement.setInt(2, trip.getId());
             preparedStatement.execute();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -194,6 +200,9 @@ public class Database {
                         .setDuration(resultSet.getDouble("duration"))
                         .setCustomer(getCustomerById(resultSet.getInt("customer_id")))
                         .setDriver(getDriverById(resultSet.getInt("driver_id")))
+                        .setID(resultSet.getInt("id"))
+                        .setIsCompleted(resultSet.getBoolean("isCompleted"))
+                        .setRating(resultSet.getFloat("rating"))
                         .build();
                 trips.add(trip);
             }
@@ -202,5 +211,120 @@ public class Database {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+    public List<Trip> getTripsByDriver(Driver driver) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM trip WHERE driver_id = ?");
+            preparedStatement.setInt(1, driver.getId());
+            preparedStatement.execute();
+            ResultSet resultSet = preparedStatement.getResultSet();
+            List<Trip> trips = new LinkedList<>();
+            while (resultSet.next()) {
+                Trip trip = new TripBuilder()
+                        .setPickupLocation(resultSet.getString("pickupLocation"))
+                        .setDestination(resultSet.getString("dropoffLocation"))
+                        .setPickupTime(resultSet.getString("pickupTime"))
+                        .setFare(resultSet.getDouble("fare"))
+                        .setDistance(resultSet.getDouble("distance"))
+                        .setDuration(resultSet.getDouble("duration"))
+                        .setCustomer(getCustomerById(resultSet.getInt("customer_id")))
+                        .setDriver(getDriverById(resultSet.getInt("driver_id")))
+                        .setID(resultSet.getInt("id"))
+                        .setIsCompleted(resultSet.getBoolean("isCompleted"))
+                        .setRating(resultSet.getFloat("rating"))
+                        .build();
+                trips.add(trip);
+            }
+            return trips;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    public void addComplaint(Complaint complaint) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO complaint (customer_id, description) VALUES (?, ?)");
+            preparedStatement.setInt(1, complaint.getCustomer().getId());
+            preparedStatement.setString(2, complaint.getDescription());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    public List<Complaint> getAllComplaints() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM complaint");
+            preparedStatement.execute();
+            ResultSet resultSet = preparedStatement.getResultSet();
+            List<Complaint> complaints = new LinkedList<>();
+            while (resultSet.next()) {
+                Complaint complaint = new Complaint(getCustomerById(resultSet.getInt("customer_id")), resultSet.getString("description"));
+                complaints.add(complaint);
+            }
+            return complaints;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    public void addCar(Car car) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO car (model, plateNumber, color, driver_id) VALUES (?, ?, ?, ?)");
+            preparedStatement.setString(1, car.getModel());
+            preparedStatement.setString(2, car.getPlateNumber());
+            preparedStatement.setString(3, car.getColor());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    public List<Car> getAllCars() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM car");
+            preparedStatement.execute();
+            ResultSet resultSet = preparedStatement.getResultSet();
+            List<Car> cars = new LinkedList<>();
+            while (resultSet.next()) {
+                Car car = new Car(resultSet.getInt("id"), resultSet.getInt("driver_id"), resultSet.getString("model"), resultSet.getString("plateNumber"), resultSet.getString("color"));
+                cars.add(car);
+            }
+            return cars;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    public void assignCarToDriver(Car car, Driver driver) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE car SET driver_id = ? WHERE id = ?");
+            preparedStatement.setInt(1, driver.getId());
+            preparedStatement.setInt(2, car.getId());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    public void unassignCarFromDriver(Driver driver) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE car SET driver_id = NULL WHERE driver_id = ?");
+            preparedStatement.setInt(1, driver.getId());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    public void getCarByDriver(Driver driver) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM car WHERE driver_id = ?");
+            preparedStatement.setInt(1, driver.getId());
+            preparedStatement.execute();
+            ResultSet resultSet = preparedStatement.getResultSet();
+            if (resultSet.next()) {
+                Car car = new Car(resultSet.getInt("id"), resultSet.getInt("driver_id"), resultSet.getString("model"), resultSet.getString("plateNumber"), resultSet.getString("color"));
+                driver.setCar(car);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

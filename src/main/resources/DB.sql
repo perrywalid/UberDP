@@ -13,7 +13,8 @@ CREATE TABLE Driver (
                         name TEXT NOT NULL,
                         email TEXT UNIQUE NOT NULL,
                         password TEXT NOT NULL,
-                        phone TEXT NOT NULL
+                        phone TEXT NOT NULL,
+                        averageRating REAL DEFAULT 0.0
 );
 
 -- Customer table

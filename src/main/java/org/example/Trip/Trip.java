@@ -17,13 +17,15 @@ public class Trip {
     private boolean isCompleted;
     private double fare;
     private FareCalculatorStrategy fareCalculatorStrategy;
+    private float rating;
 
     public double calculateFare() {
         fare = fareCalculatorStrategy.calculateFare(this);
         return fare;
     }
 
-    public Trip(Customer customer, Driver driver, String pickupLocation, String dropoffLocation, String pickupTime, double distance, double duration, boolean isCompleted, double fare, FareCalculatorStrategy fareCalculatorStrategy) {
+    public Trip(int id, Customer customer, Driver driver, String pickupLocation, String dropoffLocation, String pickupTime, double distance, double duration, boolean isCompleted, double fare, FareCalculatorStrategy fareCalculatorStrategy, float rating) {
+        this.id = id;
         this.customer = customer;
         this.driver = driver;
         this.pickupLocation = pickupLocation;
@@ -34,6 +36,7 @@ public class Trip {
         this.isCompleted = isCompleted;
         this.fare = fare;
         this.fareCalculatorStrategy = fareCalculatorStrategy;
+        this.rating = rating;
     }
 
     public String getPickupLocation() {
@@ -137,5 +140,13 @@ public class Trip {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public float getRating() {
+        return rating;
+    }
+
+    public void setRating(float rating) {
+        this.rating = rating;
     }
 }
