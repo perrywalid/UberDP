@@ -34,7 +34,7 @@ public class Database {
     public static Connection getConnection() {
         return connection;
     }
-    public User getUser(String email, String password, String type) {
+    public User loginUser(String email, String password, String type) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM " + type + " WHERE Email = ? AND Password = ?");
             preparedStatement.setString(1, email);
@@ -42,21 +42,12 @@ public class Database {
             preparedStatement.execute();
             ResultSet resultSet = preparedStatement.getResultSet();
             if (resultSet.next()) {
-                return UserFactory.createUser(type, resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("email"), null, resultSet.getString("phone"));
+                return UserFactory.createUser(type, resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("email"), resultSet.getString("password"), resultSet.getString("phone"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return null;
-    }
-    public Driver getDriver(String email, String password) {
-        return (Driver) getUser(email, password, "driver");
-    }
-    public Customer getCustomer(String email, String password) {
-        return (Customer) getUser(email, password, "customer");
-    }
-    public Employee getEmployee(String email, String password) {
-        return (Employee) getUser(email, password, "employee");
     }
     private void addUser(User user, String type) {
         try {
